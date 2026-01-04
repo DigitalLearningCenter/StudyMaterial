@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rectangle & Circles Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 650px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .question-container.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+        
+        .diagram {
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .option.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        .option.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        
+        .button-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #nextBtn {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+        
+        #nextBtn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        #nextBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+        }
+        
+        .results.active {
+            display: block;
+        }
+        
+        .score {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .message {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        #restartBtn {
+            background: #28a745;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+        }
+        
+        #restartBtn:hover {
+            background: #218838;
+        }
+        
+        .hint {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>📐 Rectangle & Circles Quiz</h1>
+        <div class="subtitle">Class 7 - Geometry Practice</div>
+        
+        <div class="progress" id="progress">Question 1 of 5</div>
+        
+        <div id="quiz"></div>
+        
+        <div class="button-container" id="buttonContainer">
+            <button id="nextBtn" disabled>Next Question</button>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Quiz Complete! 🎉</h2>
+            <div class="score" id="score"></div>
+            <div class="message" id="message"></div>
+            <button id="restartBtn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "A rectangle has a length of 12 cm and width of 5 cm. What is the area of the rectangle?",
+                options: [
+                    "17 cm²",
+                    "60 cm²",
+                    "34 cm²",
+                    "24 cm²"
+                ],
+                correct: 1,
+                hint: "Remember: Area of rectangle = length × width"
+            },
+            {
+                question: "A circle is inscribed in a square of side 14 cm. What is the diameter of the inscribed circle?",
+                options: [
+                    "7 cm",
+                    "14 cm",
+                    "28 cm",
+                    "21 cm"
+                ],
+                correct: 1,
+                hint: "An inscribed circle touches all four sides of the square"
+            },
+            {
+                question: "A quarter circle is cut from a square of side 10 cm. What is the radius of the quarter circle?",
+                options: [
+                    "5 cm",
+                    "10 cm",
+                    "20 cm",
+                    "2.5 cm"
+                ],
+                correct: 1,
+                hint: "The quarter circle fits perfectly in the corner of the square"
+            },
+            {
+                question: "If a rectangle has length 8 cm and width 6 cm, what is its perimeter?",
+                options: [
+                    "14 cm",
+                    "48 cm",
+                    "28 cm",
+                    "24 cm"
+                ],
+                correct: 2,
+                hint: "Perimeter = 2 × (length + width)"
+            },
+            {
+                question: "Four quarter circles are drawn at the four corners of a square of side 14 cm. Together, these four quarter circles form how many complete circles?",
+                options: [
+                    "4 complete circles",
+                    "2 complete circles",
+                    "1 complete circle",
+                    "3 complete circles"
+                ],
+                correct: 2,
+                hint: "Think: How many quarters make a whole?"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function loadQuestion() {
+            const quizDiv = document.getElementById('quiz');
+            const q = questions[currentQuestion];
+            
+            let html = `<div class="question-container active">
+                <div class="question">${currentQuestion + 1}. ${q.question}</div>
+                <div class="hint">💡 Hint: ${q.hint}</div>
+                <div class="options">`;
+            
+            q.options.forEach((option, index) => {
+                html += `<div class="option" onclick="selectAnswer(${index})">${option}</div>`;
+            });
+            
+            html += `</div></div>`;
+            quizDiv.innerHTML = html;
+            
+            document.getElementById('progress').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            document.getElementById('nextBtn').disabled = true;
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(index) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = index;
+            const options = document.querySelectorAll('.option');
+            const correct = questions[currentQuestion].correct;
+            
+            options[index].classList.add('selected');
+            
+            setTimeout(() => {
+                options[correct].classList.add('correct');
+                if (index !== correct) {
+                    options[index].classList.remove('selected');
+                    options[index].classList.add('incorrect');
+                } else {
+                    score++;
+                }
+                document.getElementById('nextBtn').disabled = false;
+            }, 300);
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('buttonContainer').style.display = 'none';
+            document.getElementById('progress').style.display = 'none';
+            
+            const resultsDiv = document.getElementById('results');
+            const scoreDiv = document.getElementById('score');
+            const messageDiv = document.getElementById('message');
+            
+            resultsDiv.classList.add('active');
+            scoreDiv.textContent = `${score} / ${questions.length}`;
+            
+            const percentage = (score / questions.length) * 100;
+            if (percentage === 100) {
+                messageDiv.textContent = "Perfect! You're a geometry champion! 🌟";
+            } else if (percentage >= 80) {
+                messageDiv.textContent = "Excellent work! You've got great skills! 👏";
+            } else if (percentage >= 60) {
+                messageDiv.textContent = "Good job! Keep practicing! 💪";
+            } else {
+                messageDiv.textContent = "Keep learning! Review the concepts and try again! 📚";
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            
+            document.getElementById('quiz').style.display = 'block';
+            document.getElementById('buttonContainer').style.display = 'flex';
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('results').classList.remove('active');
+            
+            loadQuestion();
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+        document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+
+        loadQuestion();
+    </script>
+</body>
+</html>
